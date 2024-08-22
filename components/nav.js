@@ -1,11 +1,10 @@
 import Link from "next/link";
-import { useRouter } from "next/navigation"; // or "next/router"
+import { usePathname } from "next/navigation"; // Correct hook for pathname in the latest Next.js
 
 export default function Nav() {
     const inactiveLink = 'flex gap-1 p-1';
-    const activeLink = inactiveLink + ' bg-white text-blue-900 rounded-l-lg';
-    const router = useRouter();
-    const pathname = router?.pathname || '';
+    const activeLink = `${inactiveLink} bg-white text-blue-900 rounded-l-lg`;
+    const pathname = usePathname(); // Use usePathname to get the current path
 
     return (
         <aside className="text-white p-4 pr-0">
@@ -43,5 +42,5 @@ export default function Nav() {
                 </Link>
             </nav>
         </aside>
-    )
+    );
 }
