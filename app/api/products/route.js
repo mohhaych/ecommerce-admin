@@ -1,6 +1,7 @@
 import { mongooseConnect } from "@/lib/mongoose";
 import { Product } from "@/models/Product";
 
+// Handle POST requests (Create a new product)
 export async function POST(req) {
     await mongooseConnect();
 
@@ -32,6 +33,7 @@ export async function POST(req) {
     }
 }
 
+// Handle PUT requests (Update an existing product)
 export async function PUT(req) {
     await mongooseConnect();
 
@@ -71,6 +73,7 @@ export async function PUT(req) {
     }
 }
 
+// Handle GET requests (Fetch products)
 export async function GET(req) {
     await mongooseConnect();
 
@@ -103,6 +106,43 @@ export async function GET(req) {
         console.error('Error fetching products:', error);
         return new Response(
             JSON.stringify({ error: 'Failed to fetch products' }),
+            { status: 500 }
+        );
+    }
+}
+
+// Handle DELETE requests (Delete a product)
+export async function DELETE(req) {
+    await mongooseConnect();
+
+    try {
+        const { searchParams } = new URL(req.url);
+        const id = searchParams.get('id');
+
+        if (!id) {
+            return new Response(
+                JSON.stringify({ error: 'No product ID provided' }),
+                { status: 400 }
+            );
+        }
+
+        // Delete the product
+        const result = await Product.findByIdAndDelete(id);
+        if (!result) {
+            return new Response(
+                JSON.stringify({ error: 'Product not found' }),
+                { status: 404 }
+            );
+        }
+
+        return new Response(
+            JSON.stringify({ message: 'Product deleted successfully' }),
+            { status: 200 }
+        );
+    } catch (error) {
+        console.error('Error deleting product:', error);
+        return new Response(
+            JSON.stringify({ error: 'Failed to delete product' }),
             { status: 500 }
         );
     }

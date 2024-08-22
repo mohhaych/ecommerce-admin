@@ -1,15 +1,14 @@
-// components/ProductForm.js
 "use client";
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useRouter } from 'next/navigation'; // or 'next/router' if you're using an older version of Next.js
-import Layout from '@/components/Layout'; // Adjust the import path based on where your Layout component is located
+import { useRouter } from 'next/navigation';
 
 export default function ProductForm({ 
     title: existingTitle = '', 
     description: existingDescription = '', 
-    price: existingPrice = '' 
+    price: existingPrice = '', 
+    _id: productId = ''  // Add productId as a prop
 }) {
     const [title, setTitle] = useState(existingTitle); // Initialize state with props
     const [description, setDescription] = useState(existingDescription);
@@ -25,9 +24,9 @@ export default function ProductForm({
         const data = { title, description, price: parseFloat(price) };
 
         try {
-            if (existingTitle) {
+            if (productId) {
                 // Editing an existing product
-                await axios.put('/api/products', data); // Adjust the endpoint if needed
+                await axios.put(`/api/products?id=${productId}`, data); // Ensure the ID is included in the URL
                 setSuccess('Product updated successfully!');
             } else {
                 // Creating a new product
@@ -81,7 +80,7 @@ export default function ProductForm({
             <button 
                 type="submit" 
                 className="btn-primary">
-                {existingTitle ? 'Update' : 'Save'}
+                {productId ? 'Update' : 'Save'}
             </button> 
             {error && <p className="text-red-500">{error}</p>}
             {success && <p className="text-green-500">{success}</p>}
