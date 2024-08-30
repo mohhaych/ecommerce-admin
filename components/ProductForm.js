@@ -8,45 +8,41 @@ export default function ProductForm({
     title: existingTitle = '', 
     description: existingDescription = '', 
     price: existingPrice = '', 
-    _id: productId = '',  // Add productId as a prop
-    images: existingImages,
+    _id: productId = '',  // Product ID prop
+    images: existingImages = [],  // Ensure default is an empty array
 }) {
-    const [title, setTitle] = useState(existingTitle); // Initialize state with props
+    const [title, setTitle] = useState(existingTitle);
     const [description, setDescription] = useState(existingDescription);
     const [price, setPrice] = useState(existingPrice);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [goToProducts, setGoToProducts] = useState(false);
-    const [images, setImages] = useState([existingImages || []]);
+    const [images, setImages] = useState(existingImages);
 
     const router = useRouter();
 
     async function handleSubmit(ev) {
         ev.preventDefault();
-        const data = { title, description, price: parseFloat(price) };
-
+        const data = { title, description, price: parseFloat(price), images };
+    
         try {
             if (productId) {
-                // Editing an existing product
-                await axios.put(`/api/products?id=${productId}`, data); // Ensure the ID is included in the URL
+                // Update the existing product
+                await axios.put(`/api/products?id=${productId}`, data); // Use PUT for updating
                 setSuccess('Product updated successfully!');
             } else {
-                // Creating a new product
-                await axios.post('/api/products', data);
+                // Create a new product
+                await axios.post('/api/products', data); // Use POST for creating
                 setSuccess('Product created successfully!');
             }
             setError('');
-            setGoToProducts(true);  // Set to true to trigger redirection
-            // Optionally reset the form fields
-            setTitle('');
-            setDescription('');
-            setPrice('');
+            setGoToProducts(true);  // Trigger redirection to products page
         } catch (err) {
             console.error('Error processing product:', err);
             setError('Failed to process product.');
             setSuccess('');
         }
-    }
+    }    
 
     useEffect(() => {
         if (goToProducts) {
@@ -63,7 +59,9 @@ export default function ProductForm({
             }
             const res = await axios.post('/api/upload', data);
             setImages(oldImages => {
-                return [...oldImages, ...res.data.links];
+                // Flatten the array and filter out any non-string values
+                const newImages = res.data.links;
+                return [...oldImages.flat(), ...newImages];
             });
         }
     }

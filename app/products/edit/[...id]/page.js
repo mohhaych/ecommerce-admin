@@ -1,4 +1,3 @@
-// app/products/edit/[id]/page.js
 "use client";
 
 import axios from "axios";
@@ -31,6 +30,8 @@ export default function EditProductPage({ params }) {
                     title={productInfo.title} 
                     description={productInfo.description} 
                     price={productInfo.price} 
+                    _id={productInfo._id}  // Pass the productId to the form
+                    images={productInfo.images} // Pass images if needed
                 />
             )}
         </Layout>
