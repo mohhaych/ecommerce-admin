@@ -82,6 +82,11 @@ export default function ProductForm({
                 Photos
             </label>
             <div className='mb-2'>
+                {!!images?.length && images.map(link => (
+                    <div>
+                        {link}
+                    </div>
+                ))}
                 <label className='w-24 h-24 cursor-pointer text-center 
                 flex items-center justify-center text-sm gap-1
                 text-gray-500 rounded-lg bg-gray-200'>
