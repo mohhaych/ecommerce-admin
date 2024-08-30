@@ -81,10 +81,10 @@ export default function ProductForm({
             <label>
                 Photos
             </label>
-            <div className='mb-2'>
+            <div className='mb-2 flex flex-wrap gap-2'>
                 {!!images?.length && images.map(link => (
-                    <div key={link}>
-                        {link}
+                    <div key={link} className='h-24'>
+                        <img src={link} alt='' className='rounded-lg'/>
                     </div>
                 ))}
                 <label className='w-24 h-24 cursor-pointer text-center 
