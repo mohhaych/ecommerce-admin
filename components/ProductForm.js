@@ -83,7 +83,7 @@ export default function ProductForm({
             </label>
             <div className='mb-2'>
                 {!!images?.length && images.map(link => (
-                    <div>
+                    <div key={link}>
                         {link}
                     </div>
                 ))}
