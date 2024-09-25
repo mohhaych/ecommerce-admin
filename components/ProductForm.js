@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import Spinner from './Spinner';
+import { ReactSortable } from 'react-sortablejs'; // Import the ReactSortable component
 
 export default function ProductForm({ 
     title: existingTitle = '', 
@@ -70,6 +71,10 @@ export default function ProductForm({
         }
     }
 
+    function updateImagesOrder(images) {
+        setImages(images);
+    }
+
     return (
         <form onSubmit={handleSubmit}>
             <label>Product name</label>
@@ -84,11 +89,16 @@ export default function ProductForm({
                 Photos
             </label>
             <div className='mb-2 flex flex-wrap gap-1'>
+                <ReactSortable 
+                list={images} 
+                className='flex flex-wrap gap-1'
+                setList={updateImagesOrder}>
                 {!!images?.length && images.map(link => (
                     <div key={link} className='h-24'>
                         <img src={link} alt='' className='rounded-lg'/>
                     </div>
                 ))}
+                </ReactSortable>
                 {isUploading && (
                     <div className='h-24 p-1 flex items-center'>
                         <Spinner />
