@@ -7,7 +7,7 @@ export async function GET() {
 
     try {
         // Fetch all categories from the database
-        const categories = await Category.find();
+        const categories = await Category.find().populate('parent');
 
         // Return the categories in JSON format
         return new Response(JSON.stringify(categories), { status: 200 });
