@@ -49,6 +49,7 @@ export default function Categories() {
                     <tr>
                         <td>Category name</td>
                         <td>Parent category</td>
+                        <td></td>
                     </tr>
                 </thead>
                 <tbody>
@@ -57,6 +58,10 @@ export default function Categories() {
                             <tr>
                                 <td>{category.name}</td>
                                 <td>{category?.parent?.name}</td>
+                                <td>
+                                    <button className="btn-primary mr-1">Edit</button>
+                                    <button className="btn-primary">Delete</button>
+                                </td>
                             </tr>
                         ))}
                 </tbody>
