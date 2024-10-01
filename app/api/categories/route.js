@@ -25,7 +25,7 @@ export async function POST(req) {
     await mongooseConnect();
 
     try {
-        const { name } = await req.json(); // Parse the JSON body
+        const { name,parentCategory } = await req.json(); // Parse the JSON body
 
         if (!name) {
             return new Response(
@@ -35,7 +35,10 @@ export async function POST(req) {
         }
 
         // Create a new category
-        const categoryDoc = await Category.create({ name });
+        const categoryDoc = await Category.create({ 
+            name,
+            parent:parentCategory 
+        });
 
         return new Response(JSON.stringify(categoryDoc), { status: 201 });
     } catch (error) {
