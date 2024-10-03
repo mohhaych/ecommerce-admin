@@ -92,3 +92,38 @@ export async function PUT(req) {
         );
     }
 }
+
+// Handle DELETE request to delete a category by _id
+export async function DELETE(req) {
+    await mongooseConnect();
+
+    try {
+        const url = new URL(req.url);
+        const _id = url.searchParams.get('_id');
+
+        if (!_id) {
+            return new Response(
+                JSON.stringify({ error: "Category ID is required" }),
+                { status: 400 }
+            );
+        }
+
+        // Find and delete the category
+        const deletedCategory = await Category.findByIdAndDelete(_id);
+
+        if (!deletedCategory) {
+            return new Response(
+                JSON.stringify({ error: "Category not found" }),
+                { status: 404 }
+            );
+        }
+
+        return new Response(JSON.stringify({ success: "Category deleted" }), { status: 200 });
+    } catch (error) {
+        console.error("Error deleting category:", error);
+        return new Response(
+            JSON.stringify({ error: "Failed to delete category" }),
+            { status: 500 }
+        );
+    }
+}
