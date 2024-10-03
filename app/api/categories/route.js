@@ -8,8 +8,6 @@ export async function GET() {
     try {
         // Fetch all categories from the database
         const categories = await Category.find().populate('parent');
-
-        // Return the categories in JSON format
         return new Response(JSON.stringify(categories), { status: 200 });
     } catch (error) {
         console.error("Error fetching categories:", error);
@@ -25,7 +23,7 @@ export async function POST(req) {
     await mongooseConnect();
 
     try {
-        const { name,parentCategory } = await req.json(); // Parse the JSON body
+        const { name, parentCategory } = await req.json(); // Parse the JSON body
 
         if (!name) {
             return new Response(
@@ -35,9 +33,9 @@ export async function POST(req) {
         }
 
         // Create a new category
-        const categoryDoc = await Category.create({ 
+        const categoryDoc = await Category.create({
             name,
-            parent:parentCategory 
+            parent: parentCategory || null, // If no parentCategory, set to null
         });
 
         return new Response(JSON.stringify(categoryDoc), { status: 201 });
@@ -45,6 +43,51 @@ export async function POST(req) {
         console.error("Error creating category:", error);
         return new Response(
             JSON.stringify({ error: "Failed to create category" }),
+            { status: 500 }
+        );
+    }
+}
+
+// Handle PUT request to update an existing category
+export async function PUT(req) {
+    await mongooseConnect();
+
+    try {
+        const { _id, name, parentCategory } = await req.json(); // Parse the JSON body
+
+        if (!_id) {
+            return new Response(
+                JSON.stringify({ error: "Category ID is required" }),
+                { status: 400 }
+            );
+        }
+
+        if (!name) {
+            return new Response(
+                JSON.stringify({ error: "Category name is required" }),
+                { status: 400 }
+            );
+        }
+
+        // Update the category
+        const updatedCategory = await Category.findByIdAndUpdate(
+            _id,
+            { name, parent: parentCategory || null }, // Update name and parentCategory
+            { new: true } // Return the updated document
+        );
+
+        if (!updatedCategory) {
+            return new Response(
+                JSON.stringify({ error: "Category not found" }),
+                { status: 404 }
+            );
+        }
+
+        return new Response(JSON.stringify(updatedCategory), { status: 200 });
+    } catch (error) {
+        console.error("Error updating category:", error);
+        return new Response(
+            JSON.stringify({ error: "Failed to update category" }),
             { status: 500 }
         );
     }

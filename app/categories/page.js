@@ -18,7 +18,14 @@ export default function Categories() {
     }
     async function saveCategory(ev) {
         ev.preventDefault();
-        await axios.post('/api/categories', { name, parentCategory });
+        const data = {name, parentCategory}
+        if (editedCategory) {
+            data._id = editedCategory._id;
+            await axios.put('/api/categories', data);
+            setEditedCategory(null);
+        } else {
+            await axios.post('/api/categories', data);
+        }
         setName('');
         fetchCategories();
     }
