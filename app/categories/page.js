@@ -14,6 +14,7 @@ function Categories ({swal}) {
     }, [])
     function fetchCategories() {
         axios.get('/api/categories').then(result => {
+            console.log(result.data);
             setCategories(result.data);
         });
     }
