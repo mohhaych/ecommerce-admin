@@ -30,6 +30,7 @@ export default function EditProductPage({ params }) {
                     title={productInfo.title} 
                     description={productInfo.description} 
                     price={productInfo.price} 
+                    category={productInfo.category} // Pass the category to the form
                     _id={productInfo._id}  // Pass the productId to the form
                     images={productInfo.images} // Pass images if needed
                 />

@@ -10,46 +10,53 @@ export default function ProductForm({
     title: existingTitle = '', 
     description: existingDescription = '', 
     price: existingPrice = '', 
-    categoryId: existingCategoryId = '', // Add existing category ID prop
+    category: assignedCategory = '', // Category passed from the product
     _id: productId = '',
     images: existingImages = [],
 }) {
-    const [title, setTitle] = useState(existingTitle);
-    const [description, setDescription] = useState(existingDescription);
-    const [price, setPrice] = useState(existingPrice);
-    const [category, setCategory] = useState(existingCategoryId); // New state for selected category
+    // Initialize the form states with the existing product data
+    const [title, setTitle] = useState(existingTitle || '');
+    const [description, setDescription] = useState(existingDescription || '');
+    const [price, setPrice] = useState(existingPrice || '');
+    const [category, setCategory] = useState(assignedCategory || ''); // Use assignedCategory for category
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [goToProducts, setGoToProducts] = useState(false);
-    const [images, setImages] = useState(existingImages);
+    const [images, setImages] = useState(existingImages || []);
     const [isUploading, setIsUploading] = useState(false);
     const [categories, setCategories] = useState([]);
     const router = useRouter();
 
     useEffect(() => {
-        // Fetch categories from API
+        // Fetch categories from the API
         axios.get('/api/categories')
             .then(result => {
-                console.log("Categories response:", result); // Log the response
                 if (Array.isArray(result.data)) {
                     setCategories(result.data);
                 } else {
-                    setCategories([]); // Ensure categories is an array
+                    setCategories([]);
                 }
             })
-            .catch((error) => {
-                console.error("Error fetching categories:", error);
-                setCategories([]);  // Handle the error by resetting categories to an empty array
+            .catch(() => {
+                setCategories([]);
             });
     }, []);
 
+    // Ensure that when editing an existing product, the form is updated correctly
+    useEffect(() => {
+        if (assignedCategory) {
+            setCategory(assignedCategory);  // Update category when assignedCategory changes
+        }
+    }, [assignedCategory]);
+
     async function handleSubmit(ev) {
         ev.preventDefault();
-        const data = { title, description, price: parseFloat(price), images, category }; // Include selected category
         
+        const data = { title, description, price: parseFloat(price), images, category }; // Include selected category
+    
         try {
             if (productId) {
-                // Update the existing product
+                // Update an existing product
                 await axios.put(`/api/products?id=${productId}`, data);
                 setSuccess('Product updated successfully!');
             } else {
@@ -59,12 +66,12 @@ export default function ProductForm({
             }
             setError('');
             setGoToProducts(true);
-        } catch (err) {
-            console.error('Error processing product:', err);
+        } catch {
             setError('Failed to process product.');
             setSuccess('');
         }
     }
+    
 
     useEffect(() => {
         if (goToProducts) {
@@ -81,7 +88,7 @@ export default function ProductForm({
                 data.append('file', file);
             }
             const res = await axios.post('/api/upload', data);
-            setImages(oldImages => [...oldImages.flat(), ...res.data.links]);
+            setImages(oldImages => [...oldImages, ...res.data.links]);
             setIsUploading(false);
         }
     }
@@ -101,7 +108,8 @@ export default function ProductForm({
                 required
             />
             <label>Category</label>
-            <select value={category} onChange={ev => setCategory(ev.target.value)}> {/* Bind selected category */}
+            <select value={category} 
+                    onChange={ev => setCategory(ev.target.value)}>
                 <option value="">Uncategorised</option>
                 {categories.length > 0 && categories.map(c => (
                     <option key={c._id} value={c._id}>{c.name}</option>

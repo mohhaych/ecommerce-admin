@@ -44,10 +44,10 @@ export async function POST(req) {
     await mongooseConnect();
 
     try {
-        const { title, description, price, images } = await req.json();
+        const { title, description, price, images, category } = await req.json();  // Include category field
 
         // Validate input data
-        if (!title || !description || isNaN(price)) {
+        if (!title || !description || isNaN(price) || !category) {
             return new Response(
                 JSON.stringify({ error: 'Invalid input' }),
                 { status: 400 }
@@ -55,7 +55,7 @@ export async function POST(req) {
         }
 
         // Create a new product
-        const productDoc = await Product.create({ title, description, price, images });
+        const productDoc = await Product.create({ title, description, price, images, category });
 
         // Respond with the created product
         return new Response(
@@ -71,7 +71,6 @@ export async function POST(req) {
     }
 }
 
-// Handle PUT requests (Update an existing product)
 export async function PUT(req) {
     await mongooseConnect();
 
@@ -79,17 +78,13 @@ export async function PUT(req) {
         const { searchParams } = new URL(req.url);
         const id = searchParams.get('id');  // Fetch the id parameter from the query string
 
-        if (!id) {
-            return new Response(
-                JSON.stringify({ error: 'Product ID is required' }),
-                { status: 400 }
-            );
-        }
+        const data = await req.json();
+        console.log('Data received for product update:', data);  // Log received data
 
-        const { title, description, price, images } = await req.json();
+        const { title, description, price, images, category } = data;  // Include category field
 
         // Validate input data
-        if (!title || !description || isNaN(price)) {
+        if (!title || !description || isNaN(price) || !category) {
             return new Response(
                 JSON.stringify({ error: 'Invalid input' }),
                 { status: 400 }
@@ -97,7 +92,11 @@ export async function PUT(req) {
         }
 
         // Update the product
-        const product = await Product.findByIdAndUpdate(id, { title, description, price, images }, { new: true });
+        const product = await Product.findByIdAndUpdate(
+            id, 
+            { title, description, price, images, category },  // Update category
+            { new: true }
+        );
 
         if (!product) {
             return new Response(
@@ -105,6 +104,8 @@ export async function PUT(req) {
                 { status: 404 }
             );
         }
+
+        console.log('Updated product:', product);  // Log the updated product
 
         // Respond with the updated product
         return new Response(
@@ -119,8 +120,6 @@ export async function PUT(req) {
         );
     }
 }
-
-
 
 
 // Handle DELETE requests (Delete a product)
