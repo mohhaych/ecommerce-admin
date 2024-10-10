@@ -33,6 +33,7 @@ export default function EditProductPage({ params }) {
                     category={productInfo.category} // Pass the category to the form
                     _id={productInfo._id}  // Pass the productId to the form
                     images={productInfo.images} // Pass images if needed
+                    properties={productInfo.properties} // Pass the properties to the form
                 />
             )}
         </Layout>

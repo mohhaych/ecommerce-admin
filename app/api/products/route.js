@@ -12,6 +12,7 @@ export async function GET(req) {
         if (id) {
             // Fetch a single product by its ID
             const product = await Product.findById(id);
+
             if (!product) {
                 return new Response(
                     JSON.stringify({ error: 'Product not found' }),
@@ -31,7 +32,6 @@ export async function GET(req) {
             );
         }
     } catch (error) {
-        console.error('Error fetching products:', error);
         return new Response(
             JSON.stringify({ error: 'Failed to fetch products' }),
             { status: 500 }
@@ -44,10 +44,10 @@ export async function POST(req) {
     await mongooseConnect();
 
     try {
-        const { title, description, price, images, category } = await req.json();  // Include category field
+        const { title, description, price, images, category, properties } = await req.json();  // Include category field
 
         // Validate input data
-        if (!title || !description || isNaN(price) || !category) {
+        if (!title || !description || isNaN(price) || !category || !properties) {
             return new Response(
                 JSON.stringify({ error: 'Invalid input' }),
                 { status: 400 }
@@ -55,7 +55,7 @@ export async function POST(req) {
         }
 
         // Create a new product
-        const productDoc = await Product.create({ title, description, price, images, category });
+        const productDoc = await Product.create({ title, description, price, images, category, properties });
 
         // Respond with the created product
         return new Response(
@@ -63,7 +63,6 @@ export async function POST(req) {
             { status: 201 }
         );
     } catch (error) {
-        console.error('Error creating product:', error);
         return new Response(
             JSON.stringify({ error: 'Failed to create product' }),
             { status: 500 }
@@ -79,12 +78,11 @@ export async function PUT(req) {
         const id = searchParams.get('id');  // Fetch the id parameter from the query string
 
         const data = await req.json();
-        console.log('Data received for product update:', data);  // Log received data
 
-        const { title, description, price, images, category } = data;  // Include category field
+        const { title, description, price, images, category, properties } = data;  // Include category field
 
         // Validate input data
-        if (!title || !description || isNaN(price) || !category) {
+        if (!title || !description || isNaN(price) || !category || !properties) {
             return new Response(
                 JSON.stringify({ error: 'Invalid input' }),
                 { status: 400 }
@@ -94,7 +92,7 @@ export async function PUT(req) {
         // Update the product
         const product = await Product.findByIdAndUpdate(
             id, 
-            { title, description, price, images, category },  // Update category
+            { title, description, price, images, category, properties },  // Update category
             { new: true }
         );
 
@@ -105,22 +103,18 @@ export async function PUT(req) {
             );
         }
 
-        console.log('Updated product:', product);  // Log the updated product
-
         // Respond with the updated product
         return new Response(
             JSON.stringify(product),
             { status: 200 }
         );
     } catch (error) {
-        console.error('Error updating product:', error);
         return new Response(
             JSON.stringify({ error: 'Failed to update product' }),
             { status: 500 }
         );
     }
 }
-
 
 // Handle DELETE requests (Delete a product)
 export async function DELETE(req) {
@@ -151,7 +145,6 @@ export async function DELETE(req) {
             { status: 200 }
         );
     } catch (error) {
-        console.error('Error deleting product:', error);
         return new Response(
             JSON.stringify({ error: 'Failed to delete product' }),
             { status: 500 }

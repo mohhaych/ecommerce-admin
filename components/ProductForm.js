@@ -13,12 +13,14 @@ export default function ProductForm({
     category: assignedCategory = '', // Category passed from the product
     _id: productId = '',
     images: existingImages = [],
+    properties: assignedProperties = {},
 }) {
     // Initialize the form states with the existing product data
     const [title, setTitle] = useState(existingTitle || '');
     const [description, setDescription] = useState(existingDescription || '');
     const [price, setPrice] = useState(existingPrice || '');
     const [category, setCategory] = useState(assignedCategory || ''); // Use assignedCategory for category
+    const [productProperties, setProductProperties] = useState(assignedProperties || {});
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [goToProducts, setGoToProducts] = useState(false);
@@ -52,7 +54,9 @@ export default function ProductForm({
     async function handleSubmit(ev) {
         ev.preventDefault();
 
-        const data = { title, description, price: parseFloat(price), images, category }; // Include selected category
+        const data = { 
+            title, description, price: parseFloat(price), images, category, properties:productProperties 
+        }; // Include selected category
 
         try {
             if (productId) {
@@ -96,12 +100,20 @@ export default function ProductForm({
         setImages(images);
     }
 
+    function setProductProp(propName, value){
+        setProductProperties(prev => {
+            const newProductProps = {...prev};
+            newProductProps[propName] = value;
+            return newProductProps;
+        });
+    }
+
     const propertiesToFill = [];
     if (categories.length > 0 && category) {
         let catInfo = categories.find(({ _id }) => _id === category);
         propertiesToFill.push(...catInfo.properties);
-        while(catInfo.parent?._id) {
-            const parentCat = categories.find(({ _id }) => _id === catInfo.parent?._id);
+        while(catInfo?.parent?._id) {
+            const parentCat = categories.find(({ _id }) => _id === catInfo?.parent?._id);
             propertiesToFill.push(...parentCat.properties);
             catInfo = parentCat;
         }
@@ -125,7 +137,18 @@ export default function ProductForm({
                 ))}
             </select>
             {propertiesToFill.length > 0 && propertiesToFill.map(p => (
-                <div>{p.name}</div>
+                <div className='flex gap-1'>
+                    <div>{p.name}</div>
+                    <select value={productProperties[p.name]} 
+                            onChange={ev => 
+                                setProductProp(p.name,ev.target.value)
+                            }
+                    >
+                        {p.values.map(v => (
+                            <option value={v}>{v}</option>
+                        ))}
+                    </select>
+                </div>
             ))}
             <label>Photos</label>
             <div className='mb-2 flex flex-wrap gap-1'>

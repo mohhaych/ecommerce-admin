@@ -8,6 +8,7 @@ const ProductSchema = new mongoose.Schema({
     price: { type: Number, required: true },
     images: [{ type: String }],
     category: {type: mongoose.Types.ObjectId, ref: 'Category'},
+    properties: { type: Object },
 });
 
 export const Product = mongoose.models.Product || mongoose.model('Product', ProductSchema);
