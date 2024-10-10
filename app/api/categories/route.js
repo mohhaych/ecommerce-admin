@@ -4,9 +4,7 @@ import { Category } from "@/models/Category";
 // Handle GET request to fetch all categories
 export async function GET() {
     await mongooseConnect();
-
     try {
-        // Fetch all categories from the database
         const categories = await Category.find().populate('parent');
         return new Response(JSON.stringify(categories), { status: 200 });
     } catch (error) {
@@ -21,9 +19,8 @@ export async function GET() {
 // Handle POST request to create a new category
 export async function POST(req) {
     await mongooseConnect();
-
     try {
-        const { name, parentCategory } = await req.json(); // Parse the JSON body
+        const { name, parentCategory, properties } = await req.json();
 
         if (!name) {
             return new Response(
@@ -32,10 +29,10 @@ export async function POST(req) {
             );
         }
 
-        // Create a new category
         const categoryDoc = await Category.create({
             name,
-            parent: parentCategory || null, // If no parentCategory, set to null
+            parent: parentCategory || null, // Assign null if no parentCategory
+            properties,
         });
 
         return new Response(JSON.stringify(categoryDoc), { status: 201 });
@@ -51,28 +48,23 @@ export async function POST(req) {
 // Handle PUT request to update an existing category
 export async function PUT(req) {
     await mongooseConnect();
-
     try {
-        const { _id, name, parentCategory } = await req.json(); // Parse the JSON body
+        const { _id, name, parentCategory, properties } = await req.json();
 
-        if (!_id) {
+        if (!_id || !name) {
             return new Response(
-                JSON.stringify({ error: "Category ID is required" }),
+                JSON.stringify({ error: "Category ID and name are required" }),
                 { status: 400 }
             );
         }
 
-        if (!name) {
-            return new Response(
-                JSON.stringify({ error: "Category name is required" }),
-                { status: 400 }
-            );
-        }
-
-        // Update the category
         const updatedCategory = await Category.findByIdAndUpdate(
             _id,
-            { name, parent: parentCategory || null }, // Update name and parentCategory
+            {
+                name,
+                parent: parentCategory || null,
+                properties,
+            },
             { new: true } // Return the updated document
         );
 
@@ -96,7 +88,6 @@ export async function PUT(req) {
 // Handle DELETE request to delete a category by _id
 export async function DELETE(req) {
     await mongooseConnect();
-
     try {
         const url = new URL(req.url);
         const _id = url.searchParams.get('_id');
@@ -108,7 +99,6 @@ export async function DELETE(req) {
             );
         }
 
-        // Find and delete the category
         const deletedCategory = await Category.findByIdAndDelete(_id);
 
         if (!deletedCategory) {
@@ -118,7 +108,10 @@ export async function DELETE(req) {
             );
         }
 
-        return new Response(JSON.stringify({ success: "Category deleted" }), { status: 200 });
+        return new Response(
+            JSON.stringify({ success: "Category deleted successfully" }),
+            { status: 200 }
+        );
     } catch (error) {
         console.error("Error deleting category:", error);
         return new Response(

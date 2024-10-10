@@ -3,6 +3,7 @@ import Layout from "@/components/Layout";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { withSwal } from 'react-sweetalert2';
+import { set } from "mongoose";
 
 function Categories({ swal }) {
     const [editedCategory, setEditedCategory] = useState(null);
@@ -23,7 +24,14 @@ function Categories({ swal }) {
 
     async function saveCategory(ev) {
         ev.preventDefault();
-        const data = { name, parentCategory, properties };
+        const data = { 
+            name, 
+            parentCategory, 
+            properties:properties.map(p => ({ 
+                name: p.name, 
+                values: p.values.split(','), 
+            })), 
+        };
 
         try {
             if (editedCategory) {
@@ -47,6 +55,12 @@ function Categories({ swal }) {
         setEditedCategory(category);
         setName(category.name);
         setParentCategory(category.parent?._id);
+        setProperties(
+            category.properties.map(({ name, values }) => ({ 
+                name, 
+                values: values.join(',') 
+            }))
+        );
     }
 
     function deleteCategory(category) {
@@ -153,15 +167,26 @@ function Categories({ swal }) {
                         </div>
                     ))}
                 </div>
-                {editedCategory && (
-                    <button className="btn-default">Cancel</button>
-                )}
-                <button
-                    type={"submit"}
-                    className="btn-primary py-1"
-                >
-                    Save
-                </button>
+                <div className="flex gap-1">
+                    {editedCategory && (
+                        <button 
+                            type="button"
+                            onClick={() => {
+                                setEditedCategory(null);
+                                setName('');
+                                setParentCategory('');
+                                setProperties([]);
+                            }}
+                            className="btn-default">Cancel
+                            </button>
+                    )}
+                    <button
+                        type={"submit"}
+                        className="btn-primary py-1"
+                    >
+                        Save
+                    </button>
+                </div>
             </form>
 
             {!editedCategory && (
