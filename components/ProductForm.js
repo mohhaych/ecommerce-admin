@@ -6,10 +6,10 @@ import { useRouter } from 'next/navigation';
 import Spinner from './Spinner';
 import { ReactSortable } from 'react-sortablejs';
 
-export default function ProductForm({ 
-    title: existingTitle = '', 
-    description: existingDescription = '', 
-    price: existingPrice = '', 
+export default function ProductForm({
+    title: existingTitle = '',
+    description: existingDescription = '',
+    price: existingPrice = '',
     category: assignedCategory = '', // Category passed from the product
     _id: productId = '',
     images: existingImages = [],
@@ -51,9 +51,9 @@ export default function ProductForm({
 
     async function handleSubmit(ev) {
         ev.preventDefault();
-        
+
         const data = { title, description, price: parseFloat(price), images, category }; // Include selected category
-    
+
         try {
             if (productId) {
                 // Update an existing product
@@ -71,7 +71,6 @@ export default function ProductForm({
             setSuccess('');
         }
     }
-    
 
     useEffect(() => {
         if (goToProducts) {
@@ -97,33 +96,46 @@ export default function ProductForm({
         setImages(images);
     }
 
+    const propertiesToFill = [];
+    if (categories.length > 0 && category) {
+        let catInfo = categories.find(({ _id }) => _id === category);
+        propertiesToFill.push(...catInfo.properties);
+        while(catInfo.parent?._id) {
+            const parentCat = categories.find(({ _id }) => _id === catInfo.parent?._id);
+            propertiesToFill.push(...parentCat.properties);
+            catInfo = parentCat;
+        }
+    }
+
     return (
         <form onSubmit={handleSubmit}>
             <label>Product name</label>
-            <input 
-                type="text" 
-                placeholder="Product name" 
-                value={title} 
+            <input
+                type="text"
+                placeholder="Product name"
+                value={title}
                 onChange={ev => setTitle(ev.target.value)}
                 required
             />
             <label>Category</label>
-            <select value={category} 
-                    onChange={ev => setCategory(ev.target.value)}>
+            <select value={category} onChange={ev => setCategory(ev.target.value)}>
                 <option value="">Uncategorised</option>
                 {categories.length > 0 && categories.map(c => (
                     <option key={c._id} value={c._id}>{c.name}</option>
                 ))}
             </select>
+            {propertiesToFill.length > 0 && propertiesToFill.map(p => (
+                <div>{p.name}</div>
+            ))}
             <label>Photos</label>
             <div className='mb-2 flex flex-wrap gap-1'>
-                <ReactSortable 
-                    list={images} 
+                <ReactSortable
+                    list={images}
                     className='flex flex-wrap gap-1'
                     setList={updateImagesOrder}>
                     {!!images?.length && images.map(link => (
                         <div key={link} className='h-24'>
-                            <img src={link} alt='' className='rounded-lg'/>
+                            <img src={link} alt='' className='rounded-lg' />
                         </div>
                     ))}
                 </ReactSortable>
@@ -142,15 +154,15 @@ export default function ProductForm({
                 </label>
             </div>
             <label>Description</label>
-            <textarea 
-                placeholder="Description" 
+            <textarea
+                placeholder="Description"
                 value={description}
                 onChange={ev => setDescription(ev.target.value)}
                 required
             />
             <label>Price (in USD)</label>
-            <input 
-                type="number" 
+            <input
+                type="number"
                 placeholder="Price"
                 value={price}
                 onChange={ev => setPrice(ev.target.value)}
@@ -158,7 +170,7 @@ export default function ProductForm({
             />
             <button type="submit" className="btn-primary">
                 {productId ? 'Update' : 'Save'}
-            </button> 
+            </button>
             {error && <p className="text-red-500">{error}</p>}
             {success && <p className="text-green-500">{success}</p>}
         </form>
